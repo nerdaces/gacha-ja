@@ -29,6 +29,7 @@ type card struct {
 func (c *card) String() string {
 	// TODO: レア度:名前のように文字列を作る
 	// 例："SR:ドラゴン"
+	return c.rarity.String() + ": " + c.name
 }
 
 type player struct {
@@ -40,6 +41,7 @@ type player struct {
 func (p *player) drawableNum() int {
 	// TODO: ガチャが行える回数を返す
 	// ガチャ券は1枚で1回、コインは10枚で1回ガチャが行える
+	return p.tickets + int(p.coin/10)
 }
 
 func (p *player) draw(n int) {
@@ -51,9 +53,14 @@ func (p *player) draw(n int) {
 
 	// TODO: ガチャ券で足りる場合はガチャ券だけ使う
 	// ガチャ券から優先的に使う
+	if p.tickets >= n {
+		p.tickets -= n
+	} else {
+		rest := n - p.tickets
+		p.tickets = 0
+		p.coin -= rest * 10 // 1回あたり10枚消費する
+	}
 
-	p.tickets = 0
-	p.coin -= n * 10 // 1回あたり10枚消費する
 }
 
 func main() {
@@ -80,6 +87,9 @@ func inputN(p *player) int {
 		fmt.Print("ガチャを引く回数>")
 		fmt.Scanln(&n)
 		// TODO: nが0より大きくmax以下である場合はbreak
+		if 0 < n && n <= max {
+			break
+		}
 
 		fmt.Printf("1以上%d以下の数を入力してください\n", max)
 	}
@@ -112,6 +122,7 @@ func draw() *card {
 	case num < 99:
 		// TODO: rarityフィールドがraritySRで
 		// nameフィールドが"ドラゴン"であるcard構造体のポインタを返す
+		return &card{rarity: raritySR, name: "ドラゴン"}
 	default:
 		return &card{rarity: rarityXR, name: "イフリート"}
 	}
